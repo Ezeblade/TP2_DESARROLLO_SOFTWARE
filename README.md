@@ -1,9 +1,5 @@
 # Prode - API Backend - Desarrollo de Software - TP2
 
-API para gestionar el fixture del Mundial de Fútbol 2026 y un sistema de pronósticos deportivos (ProDe).
-
-Desarrollado con Flask y MySQL para la materia Introducción al Desarrollo de Software (TB022).
-
 ## Requisitos
 
 - Python 3
