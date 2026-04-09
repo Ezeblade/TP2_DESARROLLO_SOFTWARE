@@ -25,7 +25,7 @@ Desarrollado con Flask y MySQL para la materia Introducción al Desarrollo de So
    FLUSH PRIVILEGES;
    EXIT; 
   
-  o cambiar las credenciales de los archivos (en init_db.py y db.py)
+      o cambiar las credenciales de los archivos (en init_db.py y db.py)
 
 5. Crear la base de datos y cargar datos iniciales:
    cd app_backend
@@ -34,4 +34,4 @@ Desarrollado con Flask y MySQL para la materia Introducción al Desarrollo de So
    Ejecutar:
      python3 -m app_backend.app
 
-Y queda la API ejecutando en el puerto 5000
+ Y queda la API ejecutando en el puerto 5000
