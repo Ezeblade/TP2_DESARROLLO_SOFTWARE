@@ -1,12 +1,13 @@
 import mysql.connector
+from app_backend.prode.constants import DB_HOST, DB_USER, DB_PASSWORD
 
 with open("init_db.sql") as f:
     sql = f.read()
 
 conn = mysql.connector.connect(
-    host="localhost",
-    user="alumno",
-    password="alumno123"
+    host=DB_HOST,
+    user=DB_USER,
+    password=DB_PASSWORD
 )
 
 cursor = conn.cursor()

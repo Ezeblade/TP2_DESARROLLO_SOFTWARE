@@ -21,10 +21,10 @@
    FLUSH PRIVILEGES;
    EXIT; 
   
-      o cambiar las credenciales de los archivos (en init_db.py y db.py)
+      o cambiar las credenciales en constants.py
 
 5. Crear la base de datos y cargar datos iniciales:
-   cd app_backend
+   cd app_backend/db
    python3 init_db.py
    cd ..
    Ejecutar:

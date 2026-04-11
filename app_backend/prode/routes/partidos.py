@@ -1,5 +1,9 @@
 from flask import Blueprint, jsonify, request
-from app_backend.db import get_connection
+from app_backend.prode.db import get_connection
+
+# EJEMPLO cuando usen validar o servicios 
+#from app_backend.prode.validators.partidos import validar_listado_partidos
+#from app_backend.prode.services.partidos import listar_partidos
 
 partidos_bp = Blueprint("partidos", __name__)
 
