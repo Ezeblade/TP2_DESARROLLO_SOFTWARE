@@ -12,11 +12,36 @@ def listar_usuarios():
         return "", 204
     return jsonify({"usuarios":usuarios}),200
 
-@usuarios_bp.route("/<init:id>", methods =["GET"])
+@usuarios_bp.route("/<int:id>", methods =["GET"])
 def obtener_usuario_por_id(id):
-    usuario_id = usuarios_service.obtener_usuario_por_id()
+    if id < 1:
+        return jsonify({
+        "errors": [{
+            "code": "BAD_REQUEST",
+            "message": "El id debe ser un entero positivo",
+            "level": "error",
+            }]
+        }), 400
+    try:
+        usuario_id = usuarios_service.obtener_usuario_por_id(id)
+    except Exception as error:
+        print(f"error inesperado al obtener usuario: {error}")
+        return jsonify({
+            "errors": [{
+                "code": "InternalServerError",
+                "message": "error al procesar la solicitud",
+                "level": "error",
+            }]
+        }), 500
     if usuario_id is None:
-        return jsonify({...}), 404
+        return jsonify({
+            "errors": [{
+                "code": "NOT_FOUND",
+                "message": "Usuario no encontrado",
+                "level": "error",
+            }]
+        }), 404
+    return jsonify(usuario_id), 200
 
 @usuarios_bp.route("/", methods=["POST"])
 def crear_usuario():
