@@ -37,5 +37,13 @@ def crear_usuario():
                 "level": "error",
             }]
         }), 409
-
+    except Exception as error:
+            print(f"error inesperado al crear partido:{str(error)}")
+            return jsonify({
+                "errors": [{
+                    "code": "InternalServerError",
+                    "message": "error al procesar la solicitud",
+                    "level": "error",
+                }]
+            }), 500
     return "", 201
