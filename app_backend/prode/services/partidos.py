@@ -17,3 +17,19 @@ def listar_partidos():
     cursor.close()
     conn.close()
     return partidos
+
+
+def crear_partido(equipo_local: int, id_equipo_local: int, estadio: str, ciudad: str, fecha: str, fase: str, goles_local: int, goles_visitante: int) -> int:
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        INSERT INTO partido (id_equipo_local, id_equipo_visitante, estadio, ciudad, fecha_partido, fase_torneo, goles_local, goles_visitante)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """,
+        (equipo_local, equipo_visitante, estadio, ciudad, fecha, fase, goles_local, goles_visitante),
+    )
+    conn.commit()
+    nuevo_partido = cur.lastrowid
+    cur.close()
+    conn.close()
+    return nuevo_partido
