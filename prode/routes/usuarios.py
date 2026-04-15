@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 import mysql.connector
-from app_backend.prode.services import usuarios as usuarios_service
+from prode.services import usuarios as usuarios_service
 usuarios_bp = Blueprint("usuarios", __name__)
 
 # Endpoints Usuarios

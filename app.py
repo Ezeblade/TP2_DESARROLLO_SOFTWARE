@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
-from app_backend.prode.routes.partidos import partidos_bp
-from app_backend.prode.routes.predicciones import prediccion_bp
-from app_backend.prode.routes.usuarios import usuarios_bp
-from app_backend.prode.routes.ranking import ranking_bp
+from prode.routes.partidos import partidos_bp
+from prode.routes.predicciones import prediccion_bp
+from prode.routes.usuarios import usuarios_bp
+from prode.routes.ranking import ranking_bp
 
 app = Flask(__name__)
 CORS(app)
