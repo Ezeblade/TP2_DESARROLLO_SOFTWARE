@@ -1,5 +1,5 @@
 import mysql.connector
-from app_backend.prode.constants import DB_HOST, DB_USER, DB_PASSWORD
+from prode.constants import DB_HOST, DB_USER, DB_PASSWORD
 
 with open("init_db.sql") as f:
     sql = f.read()

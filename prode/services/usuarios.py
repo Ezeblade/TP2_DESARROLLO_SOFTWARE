@@ -1,4 +1,4 @@
-from app_backend.prode.db import get_connection
+from prode.db import get_connection
 
 def listar_usuarios():
 
