@@ -1,7 +1,7 @@
 import mysql.connector
 from prode.constants import DB_HOST, DB_USER, DB_PASSWORD
 
-with open("init_db.sql") as f:
+with open("db/init_db.sql") as f:
     sql = f.read()
 
 conn = mysql.connector.connect(
