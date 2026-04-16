@@ -38,8 +38,8 @@ FLUSH PRIVILEGES;
 Desde la **raiz del repo**  `app_prode`:
 
 ```bash
-cd app_prode/db
-python3 init_db.py
+cd app_prode
+python3 -m db.init_db
 cd ..
 ```
 
