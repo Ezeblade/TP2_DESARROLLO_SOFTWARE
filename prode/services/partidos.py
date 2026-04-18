@@ -92,7 +92,8 @@ def actualizar_partido_put(id, equipo_local, equipo_visitante, fecha, fase):
 
     conn = get_connection() 
     cursor = conn.cursor()
-    query = """ 
+    cursor.execute(
+     """ 
         UPDATE partido
         SET id_equipo_local = %s,
             id_equipo_visitante = %s,
@@ -100,7 +101,8 @@ def actualizar_partido_put(id, equipo_local, equipo_visitante, fecha, fase):
             fase_torneo = %s
         WHERE id = %s
     """ 
-    cursor.execute(query, (id_local, id_visitante, fecha, fase, id)) 
+    (id_local, id_visitante, fecha, fase, id)
+    )
     conn.commit() 
     
     filas = cursor.rowcount 

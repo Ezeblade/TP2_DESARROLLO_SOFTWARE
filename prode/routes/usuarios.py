@@ -104,7 +104,7 @@ def reemplazar_datos_usuario_por_id(id):
             }]
         }), 409
     except Exception as error:
-            print(f"error inesperado al crear partido:{str(error)}")
+            print(f"error inesperado al remplazar datos:{str(error)}")
             return jsonify({
                 "errors": [{
                     "code": "InternalServerError",
