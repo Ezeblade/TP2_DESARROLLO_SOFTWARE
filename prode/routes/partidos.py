@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
-import mysql.connector
-from app_backend.prode.db import get_connection
-from app_backend.prode.services import partidos as partidos_service
+from prode.db import get_connection
+from prode.services import partidos as partidos_service
 # EJEMPLO cuando usen validar o servicios 
 #from app_backend.prode.validators.partidos import validar_listado_partidos
 #from app_backend.prode.services.partidos import listar_partidos

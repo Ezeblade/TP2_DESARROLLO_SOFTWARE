@@ -14,19 +14,18 @@
 
 ### 2. Entorno virtual y dependencias
 
-Ejemplo creando `venv` dentro de `app_backend`:
+Ejemplo creando `venv` dentro de app_prode:
 
 ```bash
-cd app_backend
+cd app_prode
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-cd ..
 ```
 
 ### 3. MySQL - usuario y permisos
 
-En MySQL como administrador, o cambiar credenciales en `app_backend/prode/constants.py`:
+En MySQL como administrador, o cambiar credenciales en `app_prode/prode/constants.py`:
 
 ```sql
 CREATE USER 'alumno'@'localhost' IDENTIFIED BY 'alumno123';
@@ -36,12 +35,12 @@ FLUSH PRIVILEGES;
 
 ### 4. Base de datos inicial
 
-Desde la **raiz del repo** (carpeta que contiene `app_backend`):
+Desde la **raiz del repo**  `app_prode`:
 
 ```bash
-cd app_backend/db
-python3 init_db.py
-cd ../..
+cd app_prode
+python3 -m db.init_db
+cd ..
 ```
 
 `init_db.py` abre `init_db.sql` en la misma carpeta (conviene ejecutar estos comandos para que el directorio de trabajo sea el correcto)
@@ -51,5 +50,5 @@ cd ../..
 Con el `venv` activado, desde la **raiz del repo**:
 
 ```bash
-python3 -m app_backend.app
+python3 -m app.py
 ```

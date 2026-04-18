@@ -1,1 +1,0 @@
-from app_backend.prode.db import get_connection
