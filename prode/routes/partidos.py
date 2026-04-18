@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from prode.db import get_connection
+import mysql.connector
 from prode.services import partidos as partidos_service
 # EJEMPLO cuando usen validar o servicios 
 #from app_backend.prode.validators.partidos import validar_listado_partidos
@@ -61,7 +61,47 @@ def crear_partido():
             }]
         }), 500
 
-@partidos_bp.route("/<int:id_partido>", methods=["GET"])
+@partidos_bp.route("/<string:id_partido>", methods=["GET"])
 def obtener_detalle_partido(id_partido):
-    partido = partidos_service.obtener_detalle_partido(id_partido)
+    if not id_partido.isdigit() or int(id_partido) < 1:
+        return jsonify({
+        "errors": [{
+            "code": "BAD_REQUEST",
+            "message": "El id debe ser un entero positivo",
+            "level": "error",
+            }]
+        }), 400
+    id_partido = int(id_partido)
+    if not id_partido:
+            return jsonify({
+                "errors": [{
+                    "code": "BAD_REQUEST",
+                    "message": "id_partido es obligatorio para obtener el detalle del partido",
+                    "level": "error",
+                }]
+    }), 400 # 400 CUANDO NO SE INGRESA EL ID, ES OBLIGATORIO.
+    try:
+        partido = partidos_service.obtener_detalle_partido(id_partido)
+        if partido is None:
+            return jsonify({
+                "errors": [{
+                    "code": "NOT_FOUND",
+                    "message": "partido no encontrado",
+                    "level": "error",
+                }]
+        }), 404
+        return jsonify(partido), 200
+    except Exception as error:
+        print(f"error inesperado al buscar partido:{str(error)}")
+        return jsonify({
+            "errors": [{
+                "code": "InternalServerError",
+                "message": "error al procesar la solicitud",
+                "level": "error",
+            }]
+        }), 500
+        
     
+   
+    
+   

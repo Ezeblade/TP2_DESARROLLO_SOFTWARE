@@ -57,3 +57,12 @@ def obtener_detalle_partido(id_partido: int):
     cursor.close()
     conn.close()
     return partido
+
+def eliminar_partido(id_partido:int):
+    conn= get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("DELETE FROM partido WHERE id = %s", (id_partido,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
