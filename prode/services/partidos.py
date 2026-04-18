@@ -66,3 +66,98 @@ def eliminar_partido(id_partido:int):
     cursor.close()
     conn.close()
     return True
+
+#Obtener nombre de equipo
+def obtener_id_equipo(nombre): 
+    conn = get_connection() 
+    cursor = conn.cursor() 
+    cursor.execute("SELECT id FROM equipo WHERE nombre = %s", (nombre,)) 
+    resultado = cursor.fetchone() 
+    cursor.close() 
+    conn.close() 
+    
+    return resultado[0] if resultado else None 
+
+
+
+
+#PUT
+
+def actualizar_partido_put(id, equipo_local, equipo_visitante, fecha, fase): 
+    id_local = obtener_id_equipo(equipo_local)
+    id_visitante = obtener_id_equipo(equipo_visitante)
+
+    if not id_local or not id_visitante:
+        return False 
+
+    conn = get_connection() 
+    cursor = conn.cursor()
+    query = """ 
+        UPDATE partido
+        SET id_equipo_local = %s,
+            id_equipo_visitante = %s,
+            fecha_partido = %s,
+            fase_torneo = %s
+        WHERE id = %s
+    """ 
+    cursor.execute(query, (id_local, id_visitante, fecha, fase, id)) 
+    conn.commit() 
+    
+    filas = cursor.rowcount 
+    cursor.close()
+    conn.close()
+    return filas > 0
+
+#PATCH 
+def actualizar_partido_patch(id, data):
+    partes = []
+    valores = []
+
+    # Validaciones de equipos
+    if "equipo_local" in data:
+        id_local = obtener_id_equipo(data["equipo_local"])
+        if id_local is None:
+            return False
+        partes.append("id_equipo_local = %s")
+        valores.append(id_local)
+
+    if "equipo_visitante" in data:
+        id_visitante = obtener_id_equipo(data["equipo_visitante"])
+        if id_visitante is None:   
+            return False
+        partes.append("id_equipo_visitante = %s")
+        valores.append(id_visitante)
+
+    if "fecha" in data:
+        partes.append("fecha_partido = %s")
+        valores.append(data["fecha"])
+
+    if "fase" in data:
+        partes.append("fase_torneo = %s")
+        valores.append(data["fase"])
+
+    # Evita UPDATE vacío
+    if not partes:
+        return False  
+
+    conn = get_connection()
+    cursor = conn.cursor() 
+
+    # Verificamos si existe el partido (para 404)
+    cursor.execute("SELECT id FROM partido WHERE id = %s", (id,))
+    if cursor.fetchone() is None:
+        cursor.close()
+        conn.close()
+        return "NOT_FOUND" 
+
+    # UPDATE
+    query = "UPDATE partido SET " + ", ".join(partes) + " WHERE id = %s"
+    valores.append(id)
+
+    cursor.execute(query, valores)
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return True  

@@ -102,6 +102,53 @@ def obtener_detalle_partido(id_partido):
         }), 500
         
     
-   
+   #PUT
+@partidos_bp.route("/<int:id>", methods=["PUT"])
+def actualizar_partido(id):
+    data = request.get_json() 
+    if not data:
+        return {"error": "No se enviaron datos"}, 400
+        
+    campos_obligatorios = ["equipo_local", "equipo_visitante", "fecha", "fase"] 
+
+    for campo in campos_obligatorios:
+        if campo not in data:
+               return {"error": f"Falta {campo}"}, 400
+        
+    equipo_local = data["equipo_local"]
+    equipo_visitante = data["equipo_visitante"]
+
+    if equipo_local == equipo_visitante:
+         return {"error": "Los equipos no pueden ser iguales"}, 400 
+
+    resultado = partidos_service.actualizar_partido_put(
+        id,
+        data["equipo_local"],
+        data["equipo_visitante"],
+        data["fecha"],
+        data["fase"]
+    )
+    if not resultado: 
+        return {"error": "No se pudo actualizar el partido"}, 400        
+    return "", 204 
+
+#PATCH 
+@partidos_bp.route("/<int:id>", methods=["PATCH"])
+def actualizar_partido_parcial(id):
+    data = request.get_json()
+
+    if not data:
+        return {"error": "No se enviaron datos"}, 400
+
+    resultado = partidos_service.actualizar_partido_patch(id, data)
+
+    if resultado == "NOT_FOUND":
+        return {"error": "Partido no encontrado"}, 404 
+
+    if not resultado:
+        return {"error": "No se pudo actualizar"}, 400 
+
+    return "", 204
+
     
    
