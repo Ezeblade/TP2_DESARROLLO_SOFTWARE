@@ -23,17 +23,7 @@ def contar_partidos(filtros=None):
         # Filtro por fase
         if "fase" in filtros:
             query += " AND p.fase_torneo = %s"
-            params.append(filtros["fase"])
-        
-        # Filtro por estado
-        if "estado" in filtros:
-            query += " AND p.estado = %s"
-            params.append(filtros["estado"])
-        
-        # Filtro por ciudad
-        if "ciudad" in filtros:
-            query += " AND p.ciudad LIKE %s"
-            params.append(f"%{filtros['ciudad']}%")
+            params.append(filtros["fase"])  
     
     cursor.execute(query, params)
     total = cursor.fetchone()[0]
