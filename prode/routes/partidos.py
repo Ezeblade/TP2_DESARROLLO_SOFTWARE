@@ -2,9 +2,7 @@ from flask import Blueprint, jsonify, request
 import mysql.connector
 from prode.services import partidos as partidos_service
 from prode.pagination import parse_pagination_args, build_hateoas_links
-# EJEMPLO cuando usen validar o servicios 
-#from app_backend.prode.validators.partidos import validar_listado_partidos
-#from app_backend.prode.services.partidos import listar_partidos
+from prode.validators.partidos import validar_filtros_partidos
 
 partidos_bp = Blueprint("partidos", __name__)
 
@@ -18,14 +16,95 @@ def listar_partidos():
         return jsonify({
             "errors": [{
                 "code": "BAD_REQUEST",
-                "message": str (e),
+                "message": str(e),
                 "level": "error",
             }]
         }), 400
-    total = partidos_service.contar_partidos()
+    
+    # Obtener y validar filtros
+    filtros = {}
+    
+    # Filtro por equipo (local o visitante)
+    equipo = request.args.get("equipo")
+    if equipo:
+        validacion = validar_filtros_partidos("equipo", equipo)
+        if not validacion["valido"]:
+            return jsonify({
+                "errors": [{
+                    "code": "BAD_REQUEST",
+                    "message": validacion["error"],
+                    "level": "error",
+                }]
+            }), 400
+        filtros["equipo"] = equipo
+    
+    # Filtro por fecha
+    fecha = request.args.get("fecha")
+    if fecha:
+        validacion = validar_filtros_partidos("fecha", fecha)
+        if not validacion["valido"]:
+            return jsonify({
+                "errors": [{
+                    "code": "BAD_REQUEST",
+                    "message": validacion["error"],
+                    "level": "error",
+                }]
+            }), 400
+        filtros["fecha"] = fecha
+    
+    # Filtro por fase
+    fase = request.args.get("fase")
+    if fase:
+        validacion = validar_filtros_partidos("fase", fase)
+        if not validacion["valido"]:
+            return jsonify({
+                "errors": [{
+                    "code": "BAD_REQUEST",
+                    "message": validacion["error"],
+                    "level": "error",
+                }]
+            }), 400
+        filtros["fase"] = fase
+    
+    # Filtro por estado
+    estado = request.args.get("estado")
+    if estado:
+        validacion = validar_filtros_partidos("estado", estado)
+        if not validacion["valido"]:
+            return jsonify({
+                "errors": [{
+                    "code": "BAD_REQUEST",
+                    "message": validacion["error"],
+                    "level": "error",
+                }]
+            }), 400
+        filtros["estado"] = estado
+    
+    # Filtro por ciudad
+    ciudad = request.args.get("ciudad")
+    if ciudad:
+        validacion = validar_filtros_partidos("ciudad", ciudad)
+        if not validacion["valido"]:
+            return jsonify({
+                "errors": [{
+                    "code": "BAD_REQUEST",
+                    "message": validacion["error"],
+                    "level": "error",
+                }]
+            }), 400
+        filtros["ciudad"] = ciudad
+    
+    # Contar partidos con filtros aplicados
+    total = partidos_service.contar_partidos(filtros)
+    
+    # Verificar si hay contenido (204 NO CONTENT)
     if total == 0:
         return "", 204
-    partidos = partidos_service.listar_partidos(limit, offset)
+    
+    # Obtener partidos con filtros y paginación
+    partidos = partidos_service.listar_partidos(limit, offset, filtros)
+    
+    # Construir links HATEOAS
     base_path = request.url_root.rstrip("/") + (request.path or "/")
     links = build_hateoas_links(
         base_path=base_path,
@@ -33,8 +112,8 @@ def listar_partidos():
         offset=offset,
         total=total,
     )
+    
     return jsonify({"partidos": partidos, "_links": links}), 200
-
 
 
 @partidos_bp.route("/", methods=["POST"])
@@ -82,6 +161,7 @@ def crear_partido():
             }]
         }), 500
 
+
 @partidos_bp.route("/<string:id_partido>", methods=["GET"])
 def obtener_detalle_partido(id_partido):
     if not id_partido.isdigit() or int(id_partido) < 1:
@@ -121,9 +201,8 @@ def obtener_detalle_partido(id_partido):
                 "level": "error",
             }]
         }), 500
-        
-    
-   #PUT
+
+
 @partidos_bp.route("/<string:id>", methods=["PUT"])
 def actualizar_partido(id):
     data = request.get_json(silent=True) or {}
@@ -178,9 +257,9 @@ def actualizar_partido(id):
             }]
         }), 500
     
-
     return "", 204
-#PATCH 
+
+
 @partidos_bp.route("/<int:id>", methods=["PATCH"])
 def actualizar_partido_parcial(id):
     data = request.get_json()
@@ -198,8 +277,7 @@ def actualizar_partido_parcial(id):
 
     return "", 204
 
-    
-   
+
 @partidos_bp.route("/<string:id>/resultado", methods=["PUT"])
 def cargar_o_actualizar_resultado(id):
     if not id.isdigit() or int(id) < 1:
@@ -256,5 +334,4 @@ def cargar_o_actualizar_resultado(id):
                 "level": "error",
             }]
         }), 404
-    return "", 204 
-
+    return "", 204
