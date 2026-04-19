@@ -74,6 +74,7 @@ def obtener_detalle_partido(id_partido: int):
 def eliminar_partido(id_partido:int):
     conn= get_connection()
     cursor = conn.cursor(dictionary=True)
+    cursor.execute("DELETE FROM prediccion WHERE id_partido = %s", (id_partido,))
     cursor.execute("DELETE FROM partido WHERE id = %s", (id_partido,))
     conn.commit()
     filas_eliminadas = cursor.rowcount
@@ -119,7 +120,7 @@ def actualizar_partido(id, equipo_local, equipo_visitante, fecha, fase):
     conn.close()
     return filas > 0
 #PATCH 
-def actualizar_partido_patch(id, data):
+def actualizar_partido_patch(id,data):
     partes = []
     valores = []
 
@@ -133,7 +134,7 @@ def actualizar_partido_patch(id, data):
 
     if "equipo_visitante" in data:
         id_visitante = obtener_id_equipo(data["equipo_visitante"])
-        if id_visitante is None:   
+        if id_visitante is None:
             return False
         partes.append("id_equipo_visitante = %s")
         valores.append(id_visitante)
