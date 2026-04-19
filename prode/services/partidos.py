@@ -1,31 +1,101 @@
 from prode.db import get_connection
 
-def contar_partidos():
+def contar_partidos(filtros=None):
+    """Cuenta partidos aplicando filtros opcionales"""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM partido")
+    
+    query = "SELECT COUNT(*) FROM partido p JOIN equipo el ON p.id_equipo_local = el.id JOIN equipo ev ON p.id_equipo_visitante = ev.id WHERE 1=1"
+    params = []
+    
+    if filtros:
+        # Filtro por equipo (local o visitante)
+        if "equipo" in filtros:
+            query += " AND (el.nombre LIKE %s OR ev.nombre LIKE %s)"
+            like_pattern = f"%{filtros['equipo']}%"
+            params.extend([like_pattern, like_pattern])
+        
+        # Filtro por fecha
+        if "fecha" in filtros:
+            query += " AND DATE(p.fecha_partido) = %s"
+            params.append(filtros["fecha"])
+        
+        # Filtro por fase
+        if "fase" in filtros:
+            query += " AND p.fase_torneo = %s"
+            params.append(filtros["fase"])
+        
+        # Filtro por estado
+        if "estado" in filtros:
+            query += " AND p.estado = %s"
+            params.append(filtros["estado"])
+        
+        # Filtro por ciudad
+        if "ciudad" in filtros:
+            query += " AND p.ciudad LIKE %s"
+            params.append(f"%{filtros['ciudad']}%")
+    
+    cursor.execute(query, params)
     total = cursor.fetchone()[0]
     cursor.close()
     conn.close()
     return total
 
-def listar_partidos(limit: int, offset: int):
+
+def listar_partidos(limit: int, offset: int, filtros=None):
+    """Lista partidos con paginación y filtros opcionales"""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
+    
+    query = """
         SELECT p.id,
                el.nombre AS equipo_local,
                ev.nombre AS equipo_visitante,
                p.fecha_partido AS fecha,
-               p.fase_torneo AS fase
+               p.fase_torneo AS fase,
+               p.estadio,
+               p.ciudad,
+               p.estado,
+               p.goles_local,
+               p.goles_visitante
         FROM partido p
         JOIN equipo el ON p.id_equipo_local = el.id
         JOIN equipo ev ON p.id_equipo_visitante = ev.id
-        ORDER BY p.id
-        LIMIT %s OFFSET %s
-        """,
-        (limit, offset),
-        )
+        WHERE 1=1
+    """
+    params = []
+    
+    if filtros:
+        # Filtro por equipo (local o visitante)
+        if "equipo" in filtros:
+            query += " AND (el.nombre LIKE %s OR ev.nombre LIKE %s)"
+            like_pattern = f"%{filtros['equipo']}%"
+            params.extend([like_pattern, like_pattern])
+        
+        # Filtro por fecha
+        if "fecha" in filtros:
+            query += " AND DATE(p.fecha_partido) = %s"
+            params.append(filtros["fecha"])
+        
+        # Filtro por fase
+        if "fase" in filtros:
+            query += " AND p.fase_torneo = %s"
+            params.append(filtros["fase"])
+        
+        # Filtro por estado
+        if "estado" in filtros:
+            query += " AND p.estado = %s"
+            params.append(filtros["estado"])
+        
+        # Filtro por ciudad
+        if "ciudad" in filtros:
+            query += " AND p.ciudad LIKE %s"
+            params.append(f"%{filtros['ciudad']}%")
+    
+    query += " ORDER BY p.fecha_partido ASC LIMIT %s OFFSET %s"
+    params.extend([limit, offset])
+    
+    cursor.execute(query, params)
     partidos = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -36,8 +106,8 @@ def crear_partido(equipo_local: int, equipo_visitante: int, estadio: str, ciudad
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        INSERT INTO partido (id_equipo_local, id_equipo_visitante, estadio, ciudad, fecha_partido, fase_torneo, goles_local, goles_visitante)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO partido (id_equipo_local, id_equipo_visitante, estadio, ciudad, fecha_partido, fase_torneo, goles_local, goles_visitante, estado)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'programado')
         """,
         (equipo_local, equipo_visitante, estadio, ciudad, fecha, fase, goles_local, goles_visitante),
     )
@@ -46,6 +116,7 @@ def crear_partido(equipo_local: int, equipo_visitante: int, estadio: str, ciudad
     cursor.close()
     conn.close()
     return nuevo_partido
+
 
 def obtener_detalle_partido(id_partido: int):
     conn = get_connection()
@@ -59,7 +130,8 @@ def obtener_detalle_partido(id_partido: int):
                partido.fecha_partido,
                partido.fase_torneo,
                partido.goles_local,
-               partido.goles_visitante
+               partido.goles_visitante,
+               partido.estado
         FROM partido 
         JOIN equipo equipo_local ON partido.id_equipo_local = equipo_local.id
         JOIN equipo equipo_visitante ON partido.id_equipo_visitante = equipo_visitante.id
@@ -71,6 +143,7 @@ def obtener_detalle_partido(id_partido: int):
     conn.close()
     return partido
 
+
 def eliminar_partido(id_partido:int):
     conn= get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -80,7 +153,7 @@ def eliminar_partido(id_partido:int):
     conn.close()
     return True
 
-#Obtener ID de equipo
+
 def obtener_id_equipo(nombre):
     conn = get_connection()
     cursor = conn.cursor()
@@ -117,7 +190,8 @@ def actualizar_partido(id, equipo_local, equipo_visitante, fecha, fase):
     cursor.close()
     conn.close()
     return filas > 0
-#PATCH 
+
+
 def actualizar_partido_patch(id, data):
     partes = []
     valores = []
@@ -144,6 +218,10 @@ def actualizar_partido_patch(id, data):
     if "fase" in data:
         partes.append("fase_torneo = %s")
         valores.append(data["fase"])
+    
+    if "estado" in data:
+        partes.append("estado = %s")
+        valores.append(data["estado"])
 
     # Evita UPDATE vacío
     if not partes:
@@ -175,13 +253,17 @@ def actualizar_partido_patch(id, data):
 def cargar_o_actualizar_resultado(id_partido, goles_local, goles_visitante):
     conn = get_connection()
     cursor = conn.cursor()
+    
+    # Actualizar goles y cambiar estado a 'finalizado'
     cursor.execute(
         """
         UPDATE partido 
-        SET goles_local = %s, goles_visitante = %s
+        SET goles_local = %s, 
+            goles_visitante = %s,
+            estado = 'finalizado'
         WHERE id = %s
         """, 
-        (goles_local,goles_visitante,id_partido),
+        (goles_local, goles_visitante, id_partido),
     )
     conn.commit()
     ok = cursor.rowcount > 0
