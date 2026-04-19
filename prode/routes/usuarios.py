@@ -145,14 +145,9 @@ def reemplazar_datos_usuario_por_id(id):
 
 @usuarios_bp.route('/<string:id>', methods=['DELETE'])
 def eliminar_usuario_por_id(id):
-    if  not id.isdigit() or int(id) < 1:
-        return jsonify({
-        "errors": [{
-            "code": "BAD_REQUEST",
-            "message": "El id debe ser un entero positivo",
-            "level": "error",
-            }]
-        }), 400
+    error = usuarios_validators.validar_id_entero_positivo(id)
+    if error:
+        return error
     id = int(id)
     try:
         eliminado = usuarios_service.eliminar_usuario_por_id(id)
