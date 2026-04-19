@@ -112,7 +112,7 @@ def eliminar_partido(id):
                 }]
         }), 404
     else:
-        return "", 204def  
+        return "", 204 
 
 
 @partidos_bp.route("/<string:id_partido>", methods=["GET"])
