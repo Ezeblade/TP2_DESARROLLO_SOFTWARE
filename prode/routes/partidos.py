@@ -82,6 +82,39 @@ def crear_partido():
             }]
         }), 500
 
+@partidos_bp.route("/<int:id>", methods=["DELETE"])
+def eliminar_partido(id):
+    if not id:
+        return jsonify({
+            "errors": [{
+                "code": "BAD_REQUEST",
+                "message": "El id es obligatorio para eliminar el partido",
+                "level": "error",
+            }]
+        }), 400
+    try:
+        partido_eliminado = partidos_service.eliminar_partido(id)
+    except Exception as error:
+        print(f"error inesperado al buscar partido:{str(error)}")
+        return jsonify({
+            "errors": [{
+                "code": "InternalServerError",
+                "message": "error al procesar la solicitud",
+                "level": "error",
+            }]
+        }), 500
+    if partido_eliminado is False:
+            return jsonify({
+                "errors": [{
+                    "code": "NOT_FOUND",
+                    "message": "partido no encontrado",
+                    "level": "error",
+                }]
+        }), 404
+    else:
+        return "", 204def  
+
+
 @partidos_bp.route("/<string:id_partido>", methods=["GET"])
 def obtener_detalle_partido(id_partido):
     if not id_partido.isdigit() or int(id_partido) < 1:
